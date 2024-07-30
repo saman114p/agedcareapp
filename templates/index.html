@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+        .container {
+            background-color: #e7eceb;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 100px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        textarea {
+            width: 80%;
+            padding: 10px;
+            margin: 10px auto;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            display: block;
+        }
+        button {
+            width: 30%;
+            padding: 10px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-submit {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+        .btn-clear {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-clear:hover {
+            background-color: #218838;
+        }
+        .btn-logout {
+            background-color: transparent;
+            border: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .btn-logout img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        #answer {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            text-align: left;
+        }
+        .alert {
+            color: green;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='dataaitlogo.png') }}" alt="Logo">
+        </div>
+        <h1>Aged Care Assistant</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <p>Welcome, {{ username }}.</p>
+        <textarea id="question" placeholder="Type your question here..." rows="4"></textarea><br>
+        <button id="submit-btn" class="btn-submit">Submit</button>
+        <button id="clear-btn" class="btn-clear">Clear</button>
+        <form action="{{ url_for('logout') }}" method="post" style="display: inline;">
+            <button type="submit" class="btn-logout">
+                <img src="{{ url_for('static', filename='logout.png') }}" alt="Logout">
+            </button>
+        </form>
+        <div id="answer"></div>
+    </div>
+
+    <script>
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            const question = document.getElementById('question').value;
+            fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `question=${encodeURIComponent(question)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('answer').innerText = data.answer;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('clear-btn').addEventListener('click', function() {
+            document.getElementById('question').value = '';
+            document.getElementById('answer').innerText = '';
+        });
+    </script>
+</body>
+</html>
